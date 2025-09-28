@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: catalogo-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TMDB_API_KEY=${TMDB_API_KEY}
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: catalogo-redis
+    ports:
+      - "6379:6379"

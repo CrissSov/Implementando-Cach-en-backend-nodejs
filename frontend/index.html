@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Películas Populares</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .peliculas { display: grid; grid-template-columns: repeat(auto-fill, 200px); gap: 20px; }
+    .pelicula { text-align: center; }
+    img { width: 200px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+  </style>
+</head>
+<body>
+  <h1>🎬 Te recomendamos estas películas</h1>
+  
+  <button id="btnTopNoCache">Sin Caché</button>
+  <button id="btnTopCache">Con Caché</button>
+  
+  <select id="genero">
+    <option value="28">Acción</option>
+    <option value="35">Comedia</option>
+    <option value="18">Drama</option>
+    <option value="27">Terror</option>
+    <option value="10749">Romance</option>
+  </select>
+
+  <div id="peliculas" class="peliculas"></div>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+    const contenedor = document.getElementById("peliculas");
+    const btnTopCache = document.getElementById("btnTopCache");
+    const btnTopNoCache = document.getElementById("btnTopNoCache");
+    const generoSelect = document.getElementById("genero");
+
+    async function cargarPeliculas(endpoint) {
+      contenedor.innerHTML = "⏳ Cargando...";
+      try {
+        const res = await fetch(API_URL + endpoint);
+        const data = await res.json();
+
+        mostrarPeliculas(data.results || []);
+      } catch (error) {
+        contenedor.innerHTML = "<p>Error al cargar películas.</p>";
+        console.error(error);
+      }
+    }
+
+    function mostrarPeliculas(peliculas) {
+      contenedor.innerHTML = "";
+
+      if (!peliculas || peliculas.length === 0) {
+        contenedor.innerHTML = "<p>No se encontraron películas.</p>";
+        return;
+      }
+
+      peliculas.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "pelicula";
+        div.innerHTML = `
+          <img src="https://image.tmdb.org/t/p/w200${p.poster_path}" alt="${p.title}">
+          <h3>${p.title}</h3>
+          <p>Fecha: ${p.release_date || "N/A"}</p>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    // 🎯 Eventos
+    btnTopCache.addEventListener("click", () => {
+      cargarPeliculas("/peliculas/top");
+    });
+
+    btnTopNoCache.addEventListener("click", () => {
+      cargarPeliculas("/peliculas/top-nocache");
+    });
+
+    generoSelect.addEventListener("change", (e) => {
+      cargarPeliculas(`/peliculas/por-genero/${e.target.value}`);
+    });
+
+    // cargar por defecto Top con caché
+    cargarPeliculas("/peliculas/top");
+  </script>
+</body>
+</html>
